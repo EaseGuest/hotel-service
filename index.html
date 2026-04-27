@@ -107,15 +107,17 @@ function submitRequest() {
 
     currentRequestID = generateID();
 
-    https://easeguest.app.n8n.cloud/webhook-test/15574ed5-1014-4178-808e-c73265f27b8f
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            request_id: currentRequestID,
-            room_number: room,
-            services: selected,
-            status: "Pending",
-            time: new Date().toISOString()
+    fetch("https://easeguest.app.n8n.cloud/webhook/15574ed5-1014-4178-808e-c73265f27b8f", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    request_id: currentRequestID,
+    room_number: room,
+    services: selected,
+    status: "Pending",
+    time: new Date().toISOString()
         })
     });
 
