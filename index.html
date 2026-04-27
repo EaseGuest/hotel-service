@@ -129,22 +129,41 @@ function submitRequest() {
 // 🔹 Check Status
 function checkStatus() {
 
-    if (!currentRequestID) {
-        alert("Submit a request first");
-        return;
-    }
+    function submitRequest() {
 
-    fetch("YOUR_STATUS_API_URL?request_id=" + currentRequestID)
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("statusBox").innerHTML =
-            "Request ID: " + currentRequestID +
-            "<br>Status: " + data.status;
+  let selected = [];
+  document.querySelectorAll('input[type=checkbox]:checked')
+    .forEach(el => selected.push(el.value));
+
+  if (selected.length === 0) {
+    alert("Please select at least one service");
+    return;
+  }
+
+  let room = new URLSearchParams(window.location.search).get("room");
+  let currentRequestID = "REQ-" + Date.now();
+
+  fetch("https://easeguest.app.n8n.cloud/webhook/15574ed5-1014-4178-808e-c73265f27b8f", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      request_id: currentRequestID,
+      room_number: room,
+      services: selected,
+      status: "Pending",
+      time: new Date().toISOString()
     })
-    .catch(() => {
-        document.getElementById("statusBox").innerHTML =
-            "Error fetching status";
-    });
+  })
+  .then(response => {
+    document.getElementById("statusBox").innerHTML =
+      "✅ Request Sent<br>ID: " + currentRequestID + "<br>Status: Pending";
+  })
+  .catch(error => {
+    alert("Error sending request");
+    console.log(error);
+  });
 }
 
 </script>
