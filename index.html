@@ -107,7 +107,7 @@ function submitRequest() {
 
     currentRequestID = generateID();
 
-    fetch("YOUR_N8N_WEBHOOK_URL", {
+    fetch("https://easeguest.app.n8n.cloud/webhook/your-path", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
