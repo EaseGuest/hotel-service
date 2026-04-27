@@ -1,135 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hotel Service</title>
+  <title>Hotel Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: #1f2d3d;
-    color: white;
-}
-
-.header {
-    background: #c62828;
-    padding: 15px;
-    text-align: center;
-    font-size: 20px;
-}
-
-.container {
-    padding: 15px;
-}
-
-h3 {
-    margin-top: 0;
-}
-
-label {
-    display: block;
-    margin: 10px 0;
-    font-size: 16px;
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    margin-top: 10px;
-    background: #27ae60;
-    border: none;
-    color: white;
-    font-size: 16px;
-    border-radius: 8px;
-}
-
-.secondary {
-    background: #2980b9;
-}
-
-.status-box {
-    margin-top: 20px;
-    background: #34495e;
-    padding: 15px;
-    border-radius: 10px;
-}
-</style>
+  <style>
+    body { font-family: Arial; background:#1f2d3d; color:white; padding:20px; }
+    h2 { text-align:center; }
+    .btn { width:100%; padding:15px; margin-top:10px; border:none; border-radius:5px; font-size:16px; }
+    .submit { background:#28a745; color:white; }
+    .status { background:#34495e; padding:15px; margin-top:15px; border-radius:5px; }
+  </style>
 </head>
 
 <body>
 
-<div class="header">Hotel Service</div>
-
-<div class="container">
+<h2>Hotel Service</h2>
 
 <h3>Select Services</h3>
 
-<label><input type="checkbox" value="Housekeeping"> Housekeeping</label>
-<label><input type="checkbox" value="Maintenance"> Maintenance</label>
-<label><input type="checkbox" value="Food"> Food</label>
-<label><input type="checkbox" value="Laundry"> Laundry</label>
-<label><input type="checkbox" value="Emergency"> Emergency</label>
+<label><input type="checkbox" value="Housekeeping"> Housekeeping</label><br>
+<label><input type="checkbox" value="Maintenance"> Maintenance</label><br>
+<label><input type="checkbox" value="Food"> Food</label><br>
+<label><input type="checkbox" value="Laundry"> Laundry</label><br>
+<label><input type="checkbox" value="Emergency"> Emergency</label><br>
 
-<button onclick="submitRequest()">Submit Request</button>
-<button class="secondary" onclick="checkStatus()">Check Status</button>
+<button class="btn submit" onclick="submitRequest()">Submit Request</button>
 
-<div class="status-box" id="statusBox">
-Status will appear here
-</div>
-
-</div>
+<div id="statusBox" class="status">Status will appear here</div>
 
 <script>
-
-// 🔹 Get Room Number from QR
-const urlParams = new URLSearchParams(window.location.search);
-const room = urlParams.get('room') || "Unknown";
-
-// 🔹 Generate Request ID
-function generateID() {
-    return 'REQ-' + Date.now();
-}
-
-let currentRequestID = "";
-
-// 🔹 Submit Request
 function submitRequest() {
-
-    let selected = [];
-    document.querySelectorAll('input[type=checkbox]:checked')
-    .forEach(el => selected.push(el.value));
-
-    if (selected.length === 0) {
-        alert("Please select at least one service");
-        return;
-    }
-
-    currentRequestID = generateID();
-
-    fetch("https://easeguest.app.n8n.cloud/webhook/15574ed5-1014-4178-808e-c73265f27b8f", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    request_id: currentRequestID,
-    room_number: room,
-    services: selected,
-    status: "Pending",
-    time: new Date().toISOString()
-        })
-    });
-
-    document.getElementById("statusBox").innerHTML =
-        "✅ Request Sent<br><br>ID: " + currentRequestID +
-        "<br>Status: Pending";
-}
-
-// 🔹 Check Status
-function checkStatus() {
-
-    function submitRequest() {
 
   let selected = [];
   document.querySelectorAll('input[type=checkbox]:checked')
@@ -140,33 +41,31 @@ function checkStatus() {
     return;
   }
 
-  let room = new URLSearchParams(window.location.search).get("room");
-  let currentRequestID = "REQ-" + Date.now();
+  let room = new URLSearchParams(window.location.search).get("room") || "101";
+  let requestID = "REQ-" + Date.now();
 
- fetch("https://easeguest.app.n8n.cloud/webhook-test/15574ed5-1014-4178-808e-c73265f27b8f", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    request_id: currentRequestID,
-    room_number: room,
-    services: selected,
-    status: "Pending",
-    time: new Date().toISOString()
+  fetch("https://easeguest.app.n8n.cloud/webhook-test/15574ed5-1014-4178-808e-c73265f27b8f", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      request_id: requestID,
+      room_number: room,
+      services: selected,
+      status: "Pending",
+      time: new Date().toISOString()
+    })
   })
-})
-    
-  .then(response => {
+  .then(() => {
     document.getElementById("statusBox").innerHTML =
-      "✅ Request Sent<br>ID: " + currentRequestID + "<br>Status: Pending";
+      "✅ Request Sent<br>ID: " + requestID + "<br>Status: Pending";
   })
   .catch(error => {
-    alert("Error sending request");
     console.log(error);
+    alert("Error sending request");
   });
 }
-
 </script>
 
 </body>
