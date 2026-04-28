@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hotel Service</title>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     margin: 0;
     background: #1e2a38;
     color: white;
@@ -24,11 +23,6 @@ body {
     padding: 20px;
 }
 
-label {
-    display: block;
-    margin: 5px 0;
-}
-
 button {
     width: 100%;
     padding: 12px;
@@ -39,14 +33,18 @@ button {
     cursor: pointer;
 }
 
-.submit {
+.submit-btn {
     background: #2ecc71;
 }
 
-.box {
+.status-btn {
+    background: #3498db;
+}
+
+.status-box {
     margin-top: 15px;
     padding: 15px;
-    background: #2f3e4e;
+    background: #34495e;
     border-radius: 5px;
 }
 </style>
@@ -60,67 +58,88 @@ button {
 
 <h3>Select Services</h3>
 
-<label><input type="checkbox" value="Housekeeping"> Housekeeping</label>
-<label><input type="checkbox" value="Maintenance"> Maintenance</label>
-<label><input type="checkbox" value="Food"> Food</label>
-<label><input type="checkbox" value="Laundry"> Laundry</label>
-<label><input type="checkbox" value="Emergency"> Emergency</label>
+<label><input type="checkbox" value="Housekeeping"> Housekeeping</label><br>
+<label><input type="checkbox" value="Maintenance"> Maintenance</label><br>
+<label><input type="checkbox" value="Food"> Food</label><br>
+<label><input type="checkbox" value="Laundry"> Laundry</label><br>
+<label><input type="checkbox" value="Emergency"> Emergency</label><br>
 
-<button class="submit" onclick="submitRequest()">Submit Request</button>
+<button class="submit-btn" onclick="submitRequest()">Submit Request</button>
+<button class="status-btn" onclick="checkStatus()">Check Status</button>
 
-<div id="statusBox" class="box">Status will appear here</div>
+<div id="statusBox" class="status-box">
+Status will appear here
+</div>
 
 </div>
 
 <script>
 
-// 🔹 Get room number from URL
-function getRoom() {
+// ✅ IMPORTANT: PUT YOUR PRODUCTION URL HERE
+const WEBHOOK_URL = "https://easeguest.app.n8n.cloud/webhook/15574ed5-1014-4178-808e-c73265f27b8f";
+
+let currentRequestID = null;
+
+// Get room from URL (?room=101)
+function getRoomNumber() {
     const params = new URLSearchParams(window.location.search);
     return params.get("room") || "101";
 }
 
-// 🔹 Submit request
-function submitRequest() {
+// Submit Request
+async function submitRequest() {
 
     let selected = [];
-    document.querySelectorAll("input[type=checkbox]:checked").forEach(el => {
-        selected.push(el.value);
-    });
+    document.querySelectorAll("input[type=checkbox]:checked")
+        .forEach(el => selected.push(el.value));
 
     if (selected.length === 0) {
         alert("Please select at least one service");
         return;
     }
 
-    const requestId = "REQ-" + Date.now();
-    const room = getRoom();
+    currentRequestID = "REQ-" + Date.now();
 
-    const data = {
-        request_id: requestId,
-        room_number: room,
-        services: selected
+    const payload = {
+        request_id: currentRequestID,
+        room_number: getRoomNumber(),
+        services: selected,
+        status: "Pending",
+        time: new Date().toISOString()
     };
 
-    console.log("Sending:", data);
+    try {
+        const res = await fetch(WEBHOOK_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
 
-    fetch("https://easeguest.app.n8n.cloud/webhook/15574ed5-1014-4178-808e-c73265f27b8f", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        console.log("Response:", response);
+        console.log("Response:", res);
+
         document.getElementById("statusBox").innerHTML =
-            "✅ Request Sent<br>ID: " + requestId;
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        document.getElementById("statusBox").innerHTML =
-            "❌ Failed to send request (check console)";
-    });
+            "✅ Request Sent<br>ID: " + currentRequestID +
+            "<br>Status: Pending";
+
+    } catch (err) {
+        console.error(err);
+        alert("Error sending request");
+    }
+}
+
+// Check Status (dummy for now)
+function checkStatus() {
+
+    if (!currentRequestID) {
+        alert("Submit request first");
+        return;
+    }
+
+    document.getElementById("statusBox").innerHTML =
+        "Request ID: " + currentRequestID +
+        "<br>Status: Still Pending (connect backend for live status)";
 }
 
 </script>
